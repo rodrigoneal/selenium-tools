@@ -54,6 +54,9 @@ class Page(ABC, SeleniumObject):
         """Navega para o url passado."""
         self.driver.maximize_window()
         self.driver.get(self.url)
+    
+    def close(self):
+        self.driver.close()
 
 
 class Element(ABC, SeleniumObject):
