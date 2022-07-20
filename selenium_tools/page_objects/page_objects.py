@@ -3,7 +3,6 @@ Modulo com Page Objects pronto.
 """
 
 from abc import ABC
-from contextlib import contextmanager
 from typing import Callable, List
 
 from selenium import webdriver
@@ -50,22 +49,24 @@ class Page(ABC, SeleniumObject):
             atributo_real = getattr(self, atributo)
             if isinstance(atributo_real, Element):
                 atributo_real.driver = self.driver
-    @contextmanager
     def open(self):
         """Navega para o url passado."""
-        exc = None
-        try:
-            self.driver.maximize_window()
-            self.driver.get(self.url)
-            yield
-        except Exception as _exc:
-            exc = _exc
-        finally:
-            self.driver.close()
-            if exc: raise exc
+        self.driver.maximize_window()
+        self.driver.get(self.url)
+
     
     def close(self):
         self.driver.close()
+    
+    def __enter__(self):
+        self.open()
+        return self
+    
+    def __exit__(self, type, value, traceback):
+        self.close()
+        if traceback:
+            raise type(value)
+        
 
 
 class Element(ABC, SeleniumObject):
