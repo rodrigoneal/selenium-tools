@@ -3,6 +3,7 @@ Modulo com Page Objects pronto.
 """
 
 from abc import ABC
+from pathlib import Path
 from tempfile import TemporaryFile
 from typing import Callable, List
 
@@ -34,9 +35,15 @@ class SeleniumObject:
                         time: float = 10):
         breakers = Breakers()
         img = self.find_element(element, condition, time).screenshot_as_png
-        with TemporaryFile("wb+", suffix=".png") as tempfile:
+        with TemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
             tempfile.write(img)
-            return breakers.image_captcha(tempfile.name)       
+            img_path = tempfile.name
+        result =  breakers.image_captcha(img_path)  
+        try:     
+            Path(img_path).unlink(missing_ok=True)
+        except: 
+            pass
+        return result    
         
 
     def change_frame(self, frame):
