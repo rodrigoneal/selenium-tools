@@ -3,6 +3,7 @@ Modulo com Page Objects pronto.
 """
 
 from abc import ABC
+from tempfile import TemporaryFile
 from typing import Callable, List
 
 from selenium import webdriver
@@ -10,9 +11,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
 
+from captcha_breaker import Breakers
+
 
 class SeleniumObject:
     """Classe com os elementos do selenium."""
+
     def find_element(self, element: tuple,
                      condition: Callable = EC.presence_of_element_located,
                      time: float = 10) -> WebElement:
@@ -24,6 +28,16 @@ class SeleniumObject:
                       time: float = 10) -> List[WebElement]:
         """Prcura N elementos na pagina e retorna uma lista de elementos."""
         return WebDriverWait(self.driver, time).until(condition(element))
+
+    def captcha_breaker(self, element: tuple,
+                        condition: Callable = EC.presence_of_element_located,
+                        time: float = 10):
+        breakers = Breakers()
+        img = self.find_element(element, condition, time).screenshot_as_png
+        with TemporaryFile("wb+", suffix=".png") as tempfile:
+            tempfile.write(img)
+            return breakers.image_captcha(tempfile.name)       
+        
 
     def change_frame(self, frame):
         """Altera entre o frame da pagina"""
@@ -49,24 +63,23 @@ class Page(ABC, SeleniumObject):
             atributo_real = getattr(self, atributo)
             if isinstance(atributo_real, Element):
                 atributo_real.driver = self.driver
+
     def open(self):
         """Navega para o url passado."""
         self.driver.maximize_window()
         self.driver.get(self.url)
 
-    
     def close(self):
         self.driver.close()
-    
+
     def __enter__(self):
         self.open()
         return self
-    
+
     def __exit__(self, type, value, traceback):
         self.close()
         if traceback:
             raise type(value)
-        
 
 
 class Element(ABC, SeleniumObject):
