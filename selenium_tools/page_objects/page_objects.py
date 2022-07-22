@@ -5,7 +5,7 @@ Modulo com Page Objects pronto.
 from abc import ABC
 from pathlib import Path
 from tempfile import TemporaryFile
-from typing import Callable, List
+from typing import Callable, List, Tuple
 
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,42 +16,77 @@ from captcha_breaker import Breakers
 
 
 class SeleniumObject:
-    """Classe com os elementos do selenium."""
+    """Pattern Page Objects
+    """
 
-    def find_element(self, element: tuple,
+    def find_element(self, element: Tuple[str, str],
                      condition: Callable = EC.presence_of_element_located,
                      time: float = 10) -> WebElement:
-        """Procura um elemento na página e retorna o elemento."""
+        """Encontra um elemento web.
+
+        Args:
+            element (Tuple[str, str]): Com elementos que serão buscando na tela ex:(By.XPATH, "//body").
+            condition (Callable, optional): Vai aguardar até o status passando na condição. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo que vai aguardar o elemento aparecer antes de levantar exceção. Defaults to 10.
+
+        Returns:
+            WebElement
+        """
         return WebDriverWait(self.driver, time).until(condition(element))
 
-    def find_elements(self, element: tuple,
+    def find_elements(self, element: Tuple[str, str],
                       condition: Callable = EC.presence_of_all_elements_located,
                       time: float = 10) -> List[WebElement]:
-        """Prcura N elementos na pagina e retorna uma lista de elementos."""
+        """Encontra n elementos web.
+
+        Args:
+            element (Tuple[str, str]): Com elementos que serão buscando na tela ex:(By.XPATH, "//body").
+            condition (Callable, optional): Vai aguardar até o status passando na condição. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo que vai aguardar o elemento aparecer antes de levantar exceção. Defaults to 10.
+
+        Returns:
+            List[WebElement]
+        """
         return WebDriverWait(self.driver, time).until(condition(element))
 
-    def captcha_breaker(self, element: tuple,
+    def captcha_breaker(self, element: Tuple[str, str],
                         condition: Callable = EC.presence_of_element_located,
                         time: float = 10):
+        """Quebra o captcha por imagem.
+        Args:
+            element (tuple): Elemento do selenium.
+            condition (Callable, optional): Condição para aguardar o elemento. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo de espera de um elemento na tela. Defaults to 10.
+
+        Returns:
+            str: resultado do captcha
+        """
         breakers = Breakers()
         img = self.find_element(element, condition, time).screenshot_as_png
         with TemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
             tempfile.write(img)
             img_path = tempfile.name
-        result =  breakers.image_captcha(img_path)  
-        try:     
+        result = breakers.image_captcha(img_path)
+        try:
             Path(img_path).unlink(missing_ok=True)
-        except: 
+        except:
             pass
-        return result    
-        
+        return result
 
-    def change_frame(self, frame):
-        """Altera entre o frame da pagina"""
+    def change_frame(self, frame: WebElement):
+        """Muda o frame da pagina.
+
+        Args:
+            frame (WebElement): Elemento com os dados do frame.
+        """
         self.driver.switch_to.frame(frame)
 
     def change_window(self, index: int = 1):
-        """Altera entre a janela da pagina."""
+        """Alterá a janela que está sendo manipulada
+
+        Args:
+            index (int, optional): index da pagina que vai manipular. Defaults to 1.
+        """
         self.driver.switch_to.window(self.driver.window_handles[index])
 
 
@@ -77,13 +112,21 @@ class Page(ABC, SeleniumObject):
         self.driver.get(self.url)
 
     def close(self):
-        self.driver.close()
+        """Fecha o browser.
+        """
+        self.driver.quit()
 
     def __enter__(self):
+        """Cria um contexto que no final fecha o navegador.
+
+        Returns:
+            Self
+        """
         self.open()
         return self
 
     def __exit__(self, type, value, traceback):
+        """Cria um contexto que no final fecha o navegador."""
         self.close()
         if traceback:
             raise type(value)

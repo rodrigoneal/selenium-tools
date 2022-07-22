@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "selenium_tools"
-version = "0.2.0"
+version = "0.2.1"
 description = "Facilitando a vida dos desenvolvedores da digitalpath."
 authors = ["Rodrigoneal <rodrigho2006@gmail.com>"]
 
