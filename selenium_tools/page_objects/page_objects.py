@@ -4,7 +4,7 @@ Modulo com Page Objects pronto.
 
 from abc import ABC
 from pathlib import Path
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 from typing import Callable, List, Tuple
 
 from selenium import webdriver
@@ -14,6 +14,7 @@ from selenium.webdriver.remote.webelement import WebElement
 
 from captcha_breaker import Breakers
 
+breakers = Breakers()
 
 class SeleniumObject:
     """Pattern Page Objects
@@ -61,17 +62,46 @@ class SeleniumObject:
         Returns:
             str: resultado do captcha
         """
-        breakers = Breakers()
+        
         img = self.find_element(element, condition, time).screenshot_as_png
-        with TemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
+        with NamedTemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
             tempfile.write(img)
             img_path = tempfile.name
-        result = breakers.image_captcha(img_path)
+            result = breakers.image_captcha(img_path)
         try:
             Path(img_path).unlink(missing_ok=True)
         except:
             pass
         return result
+
+    def recaptcha_breaker(self, element: Tuple[str, str],
+                    condition: Callable = EC.presence_of_element_located,
+                    time: float = 10):
+        """Quebra o captcha do recaptcha.
+        Args:
+            element (tuple): Elemento do selenium.
+            condition (Callable, optional): Condição para aguardar o elemento. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo de espera de um elemento na tela. Defaults to 10.
+
+        """
+        element = self.find_element(element, condition, time)
+        website_key = element.get_attribute("data-sitekey")
+        website_url = self.driver.current_url
+        task_id = breakers.recaptcha(website_key=website_key, website_url=website_url)
+        self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
+                                    f"'{task_id}';")
+        
+    def recaptcha_breaker_v2(self, website_key: str):
+        """Metodo menos direto de quebrar captcha, algumas paginas estão escondendo o sitekey dentro de funções do JS
+
+        Args:
+            website_key (str): sitekey do site
+        """        
+        website_url = self.driver.current_url
+        task_id = breakers.recaptcha(website_key=website_key, website_url=website_url)
+        self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
+                                    f"'{task_id}';")
+
 
     def change_frame(self, frame: WebElement):
         """Muda o frame da pagina.

@@ -21,8 +21,7 @@ class SeleniumDriver:
         if download_path:
             cls.download_path = download_path
             cls.prefs["download.default_directory"] = download_path            
-        if not read_pdf:
-            cls.prefs["plugins.always_open_pdf_externally"] = True
+        cls.prefs["plugins.always_open_pdf_externally"] = read_pdf
         if not log:
             LOGGER.setLevel(logging.ERROR)
             urllib_log.setLevel(logging.ERROR)
