@@ -1,5 +1,6 @@
-from selenium_tools.selenium_driver import SeleniumDriver,options
 from selenium.webdriver.chrome.webdriver import WebDriver
+
+from selenium_tools.selenium_driver import SeleniumDriver, options
 
 
 def test_se_selenium_driver_retorna_um_webdriver():

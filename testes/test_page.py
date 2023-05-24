@@ -1,4 +1,4 @@
-from selenium_tools import Page, Element
+from selenium_tools import Element, Page
 
 
 def test_se_page_existe():

@@ -1,14 +1,12 @@
 import logging
 from typing import Optional
-from urllib3.connectionpool import log as urllib_log
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.remote.remote_connection import LOGGER
-
-
+from urllib3.connectionpool import log as urllib_log
+from webdriver_manager.chrome import ChromeDriverManager
 
 options = webdriver.ChromeOptions()
 

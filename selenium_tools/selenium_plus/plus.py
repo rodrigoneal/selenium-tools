@@ -1,6 +1,7 @@
 from pathlib import Path
 from time import time
 from typing import Any, Callable, Dict, Optional, Tuple
+
 from selenium_tools.page_objects.page_objects import Element
 
 
