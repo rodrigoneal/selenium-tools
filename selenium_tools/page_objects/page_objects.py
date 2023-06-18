@@ -7,14 +7,12 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Callable, List, Tuple
 
-from captcha_breaker import Breakers
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium_recaptcha_solver import RecaptchaSolver
 
-breakers = Breakers()
 
 
 class SeleniumObject:
@@ -51,11 +49,12 @@ class SeleniumObject:
         """
         return WebDriverWait(self.driver, time).until(condition(element))
 
-    def captcha_breaker(self, element: Tuple[str, str],
+    def captcha_breaker(self,image_captcha_resolve: Callable, element: Tuple[str, str],
                         condition: Callable = EC.presence_of_element_located,
                         time: float = 10):
         """Quebra o captcha por imagem.
         Args:
+            image_captcha_resolve(Callable): Funcão para resolver o captcha por imagem. 
             element (tuple): Elemento do selenium.
             condition (Callable, optional): Condição para aguardar o elemento. Defaults to EC.presence_of_element_located.
             time (float, optional): Tempo de espera de um elemento na tela. Defaults to 10.
@@ -68,14 +67,14 @@ class SeleniumObject:
         with NamedTemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
             tempfile.write(img)
             img_path = tempfile.name
-            result = breakers.image_captcha(img_path)
+            result = image_captcha_resolve(img_path)
         try:
             Path(img_path).unlink(missing_ok=True)
         except:
             pass
         return result
 
-    def recaptcha_breaker(self, element: Tuple[str, str],
+    def recaptcha_breaker(self,recaptcha: Callable, element: Tuple[str, str],
                           condition: Callable = EC.presence_of_element_located,
                           time: float = 10):
         """Quebra o captcha do recaptcha.
@@ -88,19 +87,18 @@ class SeleniumObject:
         element = self.find_element(element, condition, time)
         website_key = element.get_attribute("data-sitekey")
         website_url = self.driver.current_url
-        task_id = breakers.recaptcha(
-            website_key=website_key, website_url=website_url)
+        task_id = recaptcha(website_key=website_key, website_url=website_url)
         self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
                                    f"'{task_id}';")
 
-    def recaptcha_breaker_v2(self, website_key: str):
+    def recaptcha_breaker_v2(self,recaptcha:Callable, website_key: str):
         """Metodo menos direto de quebrar captcha, algumas paginas estão escondendo o sitekey dentro de funções do JS
 
         Args:
             website_key (str): sitekey do site
         """
         website_url = self.driver.current_url
-        task_id = breakers.recaptcha(
+        task_id = recaptcha(
             website_key=website_key, website_url=website_url)
         self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
                                    f"'{task_id}';")
@@ -114,6 +112,21 @@ class SeleniumObject:
             solver.click_recaptcha_v2(captcha)
         else:
             solver.solve_recaptcha_v2_challenge(captcha)
+
+    def execute_script(self, element: WebElement, js_script: str):
+        """Executa um script.
+
+        Args:
+            element (WebElement): Elemento selenium
+            js_script (str): script 
+
+        Returns:
+            str: Retorno do script
+        """        
+        if element:
+            return self.driver.execute_script(js_script, element)
+        return self.driver.execute_script(js_script)
+        
 
     def change_frame(self, frame: WebElement):
         """Muda o frame da pagina.

@@ -1,14 +1,13 @@
 [tool.poetry]
 name = "selenium_tools"
 version = "0.3.0"
-description = "Facilitando a vida dos desenvolvedores da digitalpath."
+description = "Algumas coisas que eu mais uso no selenium para facilitar a criação do page object."
 authors = ["Rodrigoneal <rodrigho2006@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 selenium = "^4.1.0"
 webdriver-manager = "^3.5.2"
-captcha-breaker = {git = "https://github.com/digital-path/captcha_breaker_v2"}
 selenium-recaptcha-solver = "^1.8.1"
 
 [tool.poetry.dev-dependencies]
