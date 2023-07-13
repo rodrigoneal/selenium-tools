@@ -50,28 +50,30 @@ class SeleniumObject:
         return WebDriverWait(self.driver, time).until(condition(element))
 
     def captcha_breaker(self,image_captcha_resolve: Callable, element: Tuple[str, str],
+                        writter_element: Tuple[str, str] = None,
                         condition: Callable = EC.presence_of_element_located,
                         time: float = 10):
         """Quebra o captcha por imagem.
         Args:
             image_captcha_resolve(Callable): Funcão para resolver o captcha por imagem. 
             element (tuple): Elemento do selenium.
+            writter_element (tuple): Elemento que você deseja escrever o resultado do captcha.
             condition (Callable, optional): Condição para aguardar o elemento. Defaults to EC.presence_of_element_located.
             time (float, optional): Tempo de espera de um elemento na tela. Defaults to 10.
 
         Returns:
             str: resultado do captcha
         """
-
-        img = self.find_element(element, condition, time).screenshot_as_png
         with NamedTemporaryFile("wb+", suffix=".png", delete=False) as tempfile:
-            tempfile.write(img)
             img_path = tempfile.name
+            self.find_element(element, condition, time).screenshot(img_path)
             result = image_captcha_resolve(img_path)
         try:
             Path(img_path).unlink(missing_ok=True)
         except:
             pass
+        if writter_element:
+            self.find_element(writter_element).send_keys(result)
         return result
 
     def recaptcha_breaker(self,recaptcha: Callable, element: Tuple[str, str],
