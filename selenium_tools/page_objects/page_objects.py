@@ -14,14 +14,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium_recaptcha_solver import RecaptchaSolver
 
 
-
 class SeleniumObject:
-    """Pattern Page Objects
-    """
+    """Pattern Page Objects"""
 
-    def find_element(self, element: Tuple[str, str],
-                     condition: Callable = EC.presence_of_element_located,
-                     time: float = 10) -> WebElement:
+    def find_element(
+        self,
+        element: Tuple[str, str],
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ) -> WebElement:
         """Encontra um elemento web.
 
         Args:
@@ -34,9 +35,12 @@ class SeleniumObject:
         """
         return WebDriverWait(self.driver, time).until(condition(element))
 
-    def find_elements(self, element: Tuple[str, str],
-                      condition: Callable = EC.presence_of_all_elements_located,
-                      time: float = 10) -> List[WebElement]:
+    def find_elements(
+        self,
+        element: Tuple[str, str],
+        condition: Callable = EC.presence_of_all_elements_located,
+        time: float = 10,
+    ) -> List[WebElement]:
         """Encontra n elementos web.
 
         Args:
@@ -49,13 +53,17 @@ class SeleniumObject:
         """
         return WebDriverWait(self.driver, time).until(condition(element))
 
-    def captcha_breaker(self,image_captcha_resolve: Callable, element: Tuple[str, str],
-                        writter_element: Tuple[str, str] = None,
-                        condition: Callable = EC.presence_of_element_located,
-                        time: float = 10):
+    def captcha_breaker(
+        self,
+        image_captcha_resolve: Callable,
+        element: Tuple[str, str],
+        writter_element: Tuple[str, str] = None,
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ):
         """Quebra o captcha por imagem.
         Args:
-            image_captcha_resolve(Callable): Funcão para resolver o captcha por imagem. 
+            image_captcha_resolve(Callable): Funcão para resolver o captcha por imagem.
             element (tuple): Elemento do selenium.
             writter_element (tuple): Elemento que você deseja escrever o resultado do captcha.
             condition (Callable, optional): Condição para aguardar o elemento. Defaults to EC.presence_of_element_located.
@@ -76,9 +84,13 @@ class SeleniumObject:
             self.find_element(writter_element).send_keys(result)
         return result
 
-    def recaptcha_breaker(self,recaptcha: Callable, element: Tuple[str, str],
-                          condition: Callable = EC.presence_of_element_located,
-                          time: float = 10):
+    def recaptcha_breaker(
+        self,
+        recaptcha: Callable,
+        element: Tuple[str, str],
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ):
         """Quebra o captcha do recaptcha.
         Args:
             element (tuple): Elemento do selenium.
@@ -90,24 +102,31 @@ class SeleniumObject:
         website_key = element.get_attribute("data-sitekey")
         website_url = self.driver.current_url
         task_id = recaptcha(website_key=website_key, website_url=website_url)
-        self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
-                                   f"'{task_id}';")
+        self.driver.execute_script(
+            "document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
+            f"'{task_id}';"
+        )
 
-    def recaptcha_breaker_v2(self,recaptcha:Callable, website_key: str):
+    def recaptcha_breaker_v2(self, recaptcha: Callable, website_key: str):
         """Metodo menos direto de quebrar captcha, algumas paginas estão escondendo o sitekey dentro de funções do JS
 
         Args:
             website_key (str): sitekey do site
         """
         website_url = self.driver.current_url
-        task_id = recaptcha(
-            website_key=website_key, website_url=website_url)
-        self.driver.execute_script("document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
-                                   f"'{task_id}';")
+        task_id = recaptcha(website_key=website_key, website_url=website_url)
+        self.driver.execute_script(
+            "document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
+            f"'{task_id}';"
+        )
 
-    def recaptcha_by_sound(self, element: Tuple[str, str], captcha_is_visible: bool,
-                           condition: Callable = EC.presence_of_element_located,
-                           time: float = 10):
+    def recaptcha_by_sound(
+        self,
+        element: Tuple[str, str],
+        captcha_is_visible: bool,
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ):
         solver = RecaptchaSolver(driver=self.driver)
         captcha = self.find_element(element, condition, time)
         if captcha_is_visible:
@@ -120,15 +139,14 @@ class SeleniumObject:
 
         Args:
             element (WebElement): Elemento selenium
-            js_script (str): script 
+            js_script (str): script
 
         Returns:
             str: Retorno do script
-        """        
+        """
         if element:
             return self.driver.execute_script(js_script, element)
         return self.driver.execute_script(js_script)
-        
 
     def change_frame(self, frame: WebElement):
         """Muda o frame da pagina.
@@ -150,7 +168,7 @@ class SeleniumObject:
 class Page(ABC, SeleniumObject):
     """Pagina onde ficam os elementos."""
 
-    def __init__(self, driver: webdriver, url=None):
+    def __init__(self, driver: webdriver, url=str | None):
         self.driver = driver
         self.url = url
         self._reflection()
@@ -169,8 +187,7 @@ class Page(ABC, SeleniumObject):
         self.driver.get(self.url)
 
     def close(self):
-        """Fecha o browser.
-        """
+        """Fecha o browser."""
         self.driver.quit()
 
     def __enter__(self):
