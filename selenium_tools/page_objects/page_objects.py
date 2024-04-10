@@ -11,7 +11,6 @@ from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium_recaptcha_solver import RecaptchaSolver
 
 
 class SeleniumObject:
@@ -76,10 +75,8 @@ class SeleniumObject:
             img_path = tempfile.name
             self.find_element(element, condition, time).screenshot(img_path)
             result = image_captcha_resolve(img_path)
-        try:
-            Path(img_path).unlink(missing_ok=True)
-        except:
-            pass
+        Path(img_path).unlink(missing_ok=True)
+
         if writter_element:
             self.find_element(writter_element).send_keys(result)
         return result
@@ -120,19 +117,6 @@ class SeleniumObject:
             f"'{task_id}';"
         )
 
-    def recaptcha_by_sound(
-        self,
-        element: Tuple[str, str],
-        captcha_is_visible: bool,
-        condition: Callable = EC.presence_of_element_located,
-        time: float = 10,
-    ):
-        solver = RecaptchaSolver(driver=self.driver)
-        captcha = self.find_element(element, condition, time)
-        if captcha_is_visible:
-            solver.click_recaptcha_v2(captcha)
-        else:
-            solver.solve_recaptcha_v2_challenge(captcha)
 
     def execute_script(self, element: WebElement, js_script: str):
         """Executa um script.
