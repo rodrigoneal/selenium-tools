@@ -44,6 +44,7 @@ def wait_chrome_download(timeout: float = 10, download_folder: Optional[Path] = 
                     elemento_pagina = arg
                     break
                 raise DownloadFolderException('Pasta de download não encontrada.')
+            download_path = download_folder
             if not download_folder:                
                 download_path = elemento_pagina.driver.caps['options']                
             old_files_list = set(Path(download_path).resolve().iterdir())
