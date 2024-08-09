@@ -20,4 +20,8 @@ def test_se_tem_como_passar_option():
     options.add_argument
     driver = SeleniumDriver().get_driver()
     assert driver.caps["options"] == download_path
-    
+
+def test_se_entra_no_contexto():
+    with SeleniumDriver() as driver:
+        assert driver
+    breakpoint()

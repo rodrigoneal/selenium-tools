@@ -39,7 +39,13 @@ class SeleniumDriver:
 
 
     def get_driver(self) -> WebDriver:
-        driver = webdriver.Chrome(service=self.s, options=options)
+        driver = webdriver.Chrome(options=options)
         driver.caps['options'] = self.download_path or options._caps.get(
             "goog:chromeOptions").get('prefs').get('download.default_directory')
         return driver
+
+    def __enter__(self):
+        return self.get_driver()
+
+    def __exit__(self, type, value, traceback):
+        self.get_driver().quit()
