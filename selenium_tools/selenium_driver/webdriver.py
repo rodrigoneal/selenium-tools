@@ -26,6 +26,10 @@ class SeleniumDriver:
         self._prime()
     
     def _prime(self):
+        options.add_argument("--log-level=3")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
         if self.download_path:
             self.prefs["download.default_directory"] = self.download_path
         self.prefs["plugins.always_open_pdf_externally"] = self.read_pdf
