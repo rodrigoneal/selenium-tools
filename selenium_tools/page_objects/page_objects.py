@@ -16,6 +16,27 @@ from selenium.webdriver.support.ui import WebDriverWait
 class SeleniumObject:
     """Pattern Page Objects"""
 
+    def find_element_and_clear(
+        self,
+        element: Tuple[str, str],
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ) -> WebElement:
+        """Encontra um elemento web e limpa o valor.
+
+        Args:
+            element (Tuple[str, str]): Com elementos que serão buscando na tela ex:(By.XPATH, "//body").
+            condition (Callable, optional): Vai aguardar até o status passando na condição. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo que vai aguardar o elemento aparecer antes de levantar exceção. Defaults to 10.
+
+        Returns:
+            WebElement
+        """
+
+        element = WebDriverWait(self.driver, time).until(condition(element))
+        element.clear()
+        return element
+
     def find_element(
         self,
         element: Tuple[str, str],
@@ -116,7 +137,6 @@ class SeleniumObject:
             "document.getElementsByClassName('g-recaptcha-response')[0].innerHTML = "
             f"'{task_id}';"
         )
-
 
     def execute_script(self, element: WebElement, js_script: str):
         """Executa um script.

@@ -16,20 +16,29 @@ class SeleniumDriver:
     options.add_experimental_option("prefs", prefs)
     s = Service(ChromeDriverManager().install())
 
-    def __init__(self,download_path: Optional[str] = None,
-                   read_pdf: bool = True, log: bool = True,
-                   headless: bool = False) -> None:
+    def __init__(
+        self,
+        download_path: Optional[str] = None,
+        read_pdf: bool = True,
+        log: bool = True,
+        headless: bool = False,
+        show_notifications: bool = False,
+    ) -> None:
         self.download_path = download_path
         self.read_pdf = read_pdf
         self.log = log
         self.headless = headless
+        self.show_notifications = show_notifications
         self._prime()
-    
+
     def _prime(self):
         options.add_argument("--log-level=3")
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
+        if not self.show_notifications:
+            options.add_argument("--disable-notifications")
+
         if self.download_path:
             self.prefs["download.default_directory"] = self.download_path
         self.prefs["plugins.always_open_pdf_externally"] = self.read_pdf
@@ -40,12 +49,11 @@ class SeleniumDriver:
         if self.headless:
             options.add_argument("--headless=new")
 
-
-
     def get_driver(self) -> WebDriver:
         driver = webdriver.Chrome(options=options)
-        driver.caps['options'] = self.download_path or options._caps.get(
-            "goog:chromeOptions").get('prefs').get('download.default_directory')
+        driver.caps["options"] = self.download_path or options._caps.get(
+            "goog:chromeOptions"
+        ).get("prefs").get("download.default_directory")
         return driver
 
     def __enter__(self):
