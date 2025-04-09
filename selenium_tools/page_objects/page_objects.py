@@ -5,7 +5,7 @@ Modulo com Page Objects pronto.
 from abc import ABC
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -39,7 +39,7 @@ class SeleniumObject:
 
     def find_element(
         self,
-        element: Tuple[str, str],
+        element: Optional[Tuple[str, str]] = None,
         condition: Callable = EC.presence_of_element_located,
         time: float = 10,
     ) -> WebElement:
@@ -53,7 +53,9 @@ class SeleniumObject:
         Returns:
             WebElement
         """
-        return WebDriverWait(self.driver, time).until(condition(element))
+        if element:
+            return WebDriverWait(self.driver, time).until(condition(element))
+        return WebDriverWait(self.driver, time).until(condition) # Caso não tenha passado o elemento, ele vai retornar o driver e deseja esperar um alerta por exemplo.
 
     def find_elements(
         self,
