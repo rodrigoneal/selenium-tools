@@ -55,7 +55,7 @@ class SeleniumObject:
         """
         if element:
             return WebDriverWait(self.driver, time).until(condition(element))
-        return WebDriverWait(self.driver, time).until(condition) # Caso não tenha passado o elemento, ele vai retornar o driver e deseja esperar um alerta por exemplo.
+        return WebDriverWait(self.driver, time).until(condition()) # Caso não tenha passado o elemento, ele vai retornar o driver e deseja esperar um alerta por exemplo.
 
     def find_elements(
         self,
