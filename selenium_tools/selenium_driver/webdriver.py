@@ -30,6 +30,7 @@ class SeleniumDriver:
         self.headless = headless
         self.show_notifications = show_notifications
         self._prime()
+        self.driver = None
 
     def _prime(self):
         options.add_argument("--log-level=3")
@@ -57,7 +58,8 @@ class SeleniumDriver:
         return driver
 
     def __enter__(self):
-        return self.get_driver()
+        self.driver = self.get_driver()
+        return self.driver
 
     def __exit__(self, type, value, traceback):
-        self.get_driver().quit()
+        self.driver.quit()
