@@ -49,9 +49,7 @@ def wait_chrome_download(timeout: float = 10, download_folder: Optional[Path] = 
                 download_path = elemento_pagina.driver.caps['options']                
             old_files_list = set(Path(download_path).resolve().iterdir())
             end_time = time() + timeout
-            print(args, kwargs)
             func(*args, **kwargs)
-
             while time() <= end_time:
                 current_files_list = set(
                     Path(download_path).resolve().iterdir())
