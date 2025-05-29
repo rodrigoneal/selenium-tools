@@ -37,6 +37,8 @@ class SeleniumObject:
         element = WebDriverWait(self.driver, time).until(condition(element))
         element.clear()
         return element
+
+        
     def find_and_scroll(
         self,
         element: Tuple[str, str],
