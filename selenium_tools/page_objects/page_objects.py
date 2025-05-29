@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 class SeleniumObject:
@@ -35,6 +36,27 @@ class SeleniumObject:
 
         element = WebDriverWait(self.driver, time).until(condition(element))
         element.clear()
+        return element
+    def find_and_scroll(
+        self,
+        element: Tuple[str, str],
+        condition: Callable = EC.presence_of_element_located,
+        time: float = 10,
+    ) -> WebElement:
+        """Encontra um elemento web e rola para ele.
+
+        Args:
+            element (Tuple[str, str]): Com elementos que são buscando na tela ex:(By.XPATH, "//body").
+            condition (Callable, optional): Vai aguardar até o status passando na condição. Defaults to EC.presence_of_element_located.
+            time (float, optional): Tempo que vai aguardar o elemento aparecer antes de levantar exceção. Defaults to 10.
+
+        Returns:
+            WebElement
+        """
+
+        element = WebDriverWait(self.driver, time).until(condition(element))
+        actions = ActionChains(self.driver)
+        actions.move_to_element(element).perform()
         return element
 
     def find_element(
