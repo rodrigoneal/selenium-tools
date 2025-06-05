@@ -23,12 +23,14 @@ class SeleniumDriver:
         log: bool = True,
         headless: bool = False,
         show_notifications: bool = False,
+        escala_tela: float = 1.0,
     ) -> None:
         self.download_path = download_path
         self.read_pdf = read_pdf
         self.log = log
         self.headless = headless
         self.show_notifications = show_notifications
+        self.escala_tela = escala_tela
         self._prime()
         self.driver = None
 
@@ -37,6 +39,7 @@ class SeleniumDriver:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
+        options.add_argument(f"--force-device-scale-factor={self.escala_tela}")
         if not self.show_notifications:
             options.add_argument("--disable-notifications")
 

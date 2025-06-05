@@ -38,7 +38,6 @@ class SeleniumObject:
         element.clear()
         return element
 
-        
     def find_and_scroll(
         self,
         element: Tuple[str, str],
@@ -200,6 +199,33 @@ class SeleniumObject:
             index (int, optional): index da pagina que vai manipular. Defaults to 1.
         """
         self.driver.switch_to.window(self.driver.window_handles[index])
+
+    def wait_text_change(
+        self,
+        element: Tuple[str, str],
+        old_text: str,
+        time: float = 10,
+    ) -> str:
+        """Aguarda até que o texto de um elemento mude.
+
+        Args:
+            element (Tuple[str, str]): Localizador do elemento (ex: (By.XPATH, "//div[@id='mensagem']")).
+            old_text (str): Texto antigo que será comparado.
+            time (float, optional): Tempo máximo de espera em segundos. Defaults to 10.
+
+        Returns:
+            str: Novo texto do elemento após mudança.
+        """
+
+        def text_changed(driver):
+            try:
+                el = driver.find_element(*element)
+                return el.text != old_text and el.text
+            except Exception:
+                return False
+
+        WebDriverWait(self.driver, time).until(text_changed)
+        return self.driver.find_element(*element).text
 
 
 class Page(ABC, SeleniumObject):
