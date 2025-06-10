@@ -3,6 +3,7 @@ Modulo com Page Objects pronto.
 """
 
 from abc import ABC
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Callable, List, Optional, Tuple
@@ -184,11 +185,31 @@ class SeleniumObject:
             return self.driver.execute_script(js_script, element)
         return self.driver.execute_script(js_script)
 
-    def change_frame(self, frame: WebElement):
-        """Muda o frame da pagina.
+    @contextmanager
+    def change_frame_context(
+        self, frame: WebElement, main_frame: Optional[WebElement] = None
+    ):
+        """Altera o frame que vai ser manipulado.
 
         Args:
-            frame (WebElement): Elemento com os dados do frame.
+            frame (WebElement): Frame que vai ser manipulado
+            main_frame (Optional[WebElement], optional): Frame principal. Defaults to None.
+        """
+        self.driver.switch_to.frame(frame)
+        try:
+            yield
+        finally:
+            if main_frame:
+                self.driver.switch_to.frame(main_frame)
+            else:
+                self.driver.switch_to.default_content()
+
+    def change_frame(self, frame: WebElement):
+        """Altera o frame que vai ser manipulado.
+
+        Args:
+            frame (WebElement): Frame que vai ser manipulado
+            main_frame (Optional[WebElement], optional): Frame principal. Defaults to None.
         """
         self.driver.switch_to.frame(frame)
 
