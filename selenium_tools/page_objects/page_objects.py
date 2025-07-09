@@ -265,9 +265,10 @@ class Page(ABC, SeleniumObject):
             if isinstance(atributo_real, Element):
                 atributo_real.driver = self.driver
 
-    def open(self):
+    def open(self, maximize_window: bool = True):
         """Navega para o url passado."""
-        self.driver.maximize_window()
+        if maximize_window:
+            self.driver.maximize_window()
         self.driver.get(self.url)
 
     def close(self):

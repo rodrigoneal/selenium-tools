@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Optional
 
 from selenium import webdriver
@@ -9,6 +10,15 @@ from urllib3.connectionpool import log as urllib_log
 from webdriver_manager.chrome import ChromeDriverManager
 
 options = webdriver.ChromeOptions()
+
+def running_in_docker() -> bool:
+    path = "/proc/1/cgroup"
+    if os.path.exists("/.dockerenv"):
+        return True
+    if os.path.isfile(path):
+        with open(path) as f:
+            return any("docker" in line or "kubepods" in line or "containerd" in line for line in f)
+    return False
 
 
 class SeleniumDriver:
@@ -24,6 +34,7 @@ class SeleniumDriver:
         headless: bool = False,
         show_notifications: bool = False,
         escala_tela: float = 1.0,
+        window_size: tuple[int, int] = False,
     ) -> None:
         self.download_path = download_path
         self.read_pdf = read_pdf
@@ -31,6 +42,7 @@ class SeleniumDriver:
         self.headless = headless
         self.show_notifications = show_notifications
         self.escala_tela = escala_tela
+        self.window_size = window_size
         self._prime()
         self.driver = None
 
@@ -39,6 +51,8 @@ class SeleniumDriver:
         options.add_argument("--no-sandbox")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
+        if self.window_size:
+            options.add_argument(f"--window-size={self.window_size[0]},{self.window_size[1]}")
         options.add_argument(f"--force-device-scale-factor={self.escala_tela}")
         if not self.show_notifications:
             options.add_argument("--disable-notifications")
@@ -50,7 +64,7 @@ class SeleniumDriver:
             LOGGER.setLevel(logging.ERROR)
             urllib_log.setLevel(logging.ERROR)
             options.add_argument("--log-level=3")
-        if self.headless:
+        if self.headless or running_in_docker():
             options.add_argument("--headless=new")
 
     def get_driver(self) -> WebDriver:
