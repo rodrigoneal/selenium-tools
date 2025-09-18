@@ -221,11 +221,25 @@ class SeleniumObject:
         """
         self.driver.switch_to.window(self.driver.window_handles[index])
 
+    def wait_window_change(
+        self, qtd_janelas: int = 1, time: float = 10
+    ) -> WebDriverWait:
+        """Espera até que o numero de janelas seja igual ao qtd_janelas
+
+        Keyword Arguments:
+            qtd_janelas -- Quantidade de janelas (default: {1})
+            time -- Tempo de aguardo (default: {10})
+        """
+        return WebDriverWait(self.driver, time).until(
+            lambda driver: len(driver.window_handles) == qtd_janelas
+        )
+
     def wait_text_change(
         self,
         element: Tuple[str, str],
         old_text: str,
         time: float = 10,
+        attribute: str = "text",
     ) -> str:
         """Aguarda até que o texto de um elemento mude.
 
@@ -241,12 +255,16 @@ class SeleniumObject:
         def text_changed(driver):
             try:
                 el = driver.find_element(*element)
-                return el.text != old_text and el.text
+                if attribute == "text":
+                    return el.text != old_text and el.text
+                return el.get_attribute(attribute) != old_text
             except Exception:
                 return False
 
         WebDriverWait(self.driver, time).until(text_changed)
-        return self.driver.find_element(*element).text
+        if attribute == "text":
+            return self.driver.find_element(*element).text
+        return self.driver.find_element(*element).get_attribute(attribute)
 
 
 class Page(ABC, SeleniumObject):
