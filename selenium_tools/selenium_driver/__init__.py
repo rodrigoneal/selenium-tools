@@ -1,1 +1,1 @@
-from .webdriver import SeleniumDriver, options
+from .webdriver import SeleniumDriver
