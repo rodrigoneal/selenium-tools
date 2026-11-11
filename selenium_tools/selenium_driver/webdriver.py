@@ -42,6 +42,7 @@ class SeleniumDriver:
         show_notifications: bool = False,
         escala_tela: float = 1.0,
         window_size: tuple[int, int] | None = None,
+        proxy: Optional[str] = None,
     ) -> None:
 
         self.download_path = download_path
@@ -51,6 +52,7 @@ class SeleniumDriver:
         self.show_notifications = show_notifications
         self.escala_tela = escala_tela
         self.window_size = window_size
+        self.proxy = proxy
 
         self.driver: WebDriver | None = None
 
@@ -65,6 +67,9 @@ class SeleniumDriver:
         options.add_argument(
             f"--force-device-scale-factor={self.escala_tela}"
         )
+        
+        if self.proxy:
+            options.add_argument(f"--proxy-server={self.proxy}")
 
         if self.window_size:
             options.add_argument(
